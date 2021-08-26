@@ -1,7 +1,18 @@
 import React from "react";
-import { StyleSheet, Text, View } from "react-native";
+import {
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  TouchableWithoutFeedback,
+  View,
+} from "react-native";
 import { Accelerometer } from "expo-sensors";
-import { STEP_SENSITIVITY } from "../utils/AppConstant";
+import {
+  JOYSTICK_SENSITIVITY,
+  JOYSTICK_SIZE,
+  STEP_SENSITIVITY,
+} from "../utils/AppConstant";
+import { AntDesign } from "@expo/vector-icons";
 import AxisPad from "react-native-axis-pad";
 
 class Home extends React.Component {
@@ -10,6 +21,7 @@ class Home extends React.Component {
     y: 0,
     z: 0,
     step: 0,
+    dir: "",
   };
 
   componentDidMount() {
@@ -41,6 +53,9 @@ class Home extends React.Component {
         });
       }
     }
+    if (prevState.dir !== this.state.dir) {
+      console.log("dir: ", this.state.dir);
+    }
   }
 
   componentWillUnmount() {
@@ -48,22 +63,126 @@ class Home extends React.Component {
     this.subscription = null;
   }
 
+  handleDir = ({ x, y }) => {
+    let posVal = JOYSTICK_SENSITIVITY;
+    let negVal = JOYSTICK_SENSITIVITY * -1;
+    let dir = "";
+
+    if (x < negVal || x > posVal || y < negVal || y > posVal) {
+      if (x < 0) {
+        if (y > x * -1) {
+          dir = "E";
+        } else if (y < x) {
+          dir = "W";
+        } else {
+          dir = "S";
+        }
+      } else if (x > 0) {
+        if (y < x * -1) {
+          dir = "W";
+        } else if (y > x) {
+          dir = "E";
+        } else {
+          dir = "N";
+        }
+      }
+    }
+
+    this.setState({
+      dir,
+    });
+  };
+
+  handleMenu = () => {
+    console.log("menu");
+  };
+
+  handleButtonAShort = () => {
+    console.log("short A");
+  };
+
+  handleButtonALong = () => {
+    console.log("long A");
+  };
+
+  handleButtonBShort = () => {
+    console.log("short B");
+  };
+
+  handleButtonBLong = () => {
+    console.log("long B");
+  };
+
   render() {
     const { step } = this.state;
 
     return (
       <View style={styles.container}>
-        <Text>Walk! And watch this go up: {step}</Text>
-        <AxisPad
-          resetOnRelease={true}
-          autoCenter={true}
-          size={150}
-          handlerSize={75}
-          onValue={({ x, y }) => {
-            // values are between -1 and 1
-            // console.log(x, y);
-          }}
-        ></AxisPad>
+        <View style={styles.joystickContainer}>
+          <AxisPad
+            resetOnRelease={true}
+            autoCenter={true}
+            size={JOYSTICK_SIZE}
+            handlerSize={JOYSTICK_SIZE * (2 / 3)}
+            onValue={this.handleDir}
+          ></AxisPad>
+        </View>
+        <View style={styles.controlMenuContainer}>
+          <View
+            style={{
+              transform: [{ rotate: "90deg" }],
+              alignItems: "center",
+              justifyContent: "center",
+              marginLeft: 50,
+            }}
+          >
+            <TouchableOpacity onPress={this.handleMenu}>
+              <AntDesign
+                name="menufold"
+                size={40}
+                style={{ marginBottom: 20 }}
+              />
+            </TouchableOpacity>
+            <Text style={styles.stepText}>STEP</Text>
+            <Text style={styles.stepNumber}>{step}</Text>
+          </View>
+        </View>
+        <View style={styles.gameButtonContainer}>
+          <View
+            style={[
+              styles.gameButton,
+              {
+                backgroundColor: "lightcoral",
+              },
+            ]}
+          >
+            <TouchableOpacity
+              onPress={this.handleButtonBShort}
+              onLongPress={this.handleButtonBLong}
+              style={styles.gameButtonTouchable}
+            >
+              <Text style={styles.gameButtonText}>B</Text>
+            </TouchableOpacity>
+          </View>
+          <View style={styles.gameButton} />
+          <View style={styles.gameButton} />
+          <View
+            style={[
+              styles.gameButton,
+              {
+                backgroundColor: "mediumspringgreen",
+              },
+            ]}
+          >
+            <TouchableOpacity
+              onPress={this.handleButtonAShort}
+              onLongPress={this.handleButtonALong}
+              style={styles.gameButtonTouchable}
+            >
+              <Text style={styles.gameButtonText}>A</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
       </View>
     );
   }
@@ -76,8 +195,46 @@ const styles = StyleSheet.create({
     marginTop: 50,
     alignItems: "center",
   },
-  text: {
-    fontSize: 40,
+  joystickContainer: {
+    flex: 4,
+    width: "100%",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  controlMenuContainer: {
+    flex: 2,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  gameButtonContainer: {
+    flex: 4,
+    width: "100%",
+    flexDirection: "row",
+    flexWrap: "wrap",
+  },
+  stepText: {
+    fontSize: 12,
+  },
+  stepNumber: {
+    fontSize: 21,
+  },
+  gameButton: {
+    width: "50%",
+    height: "50%",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  gameButtonTouchable: {
+    width: "100%",
+    height: "100%",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "white",
+  },
+  gameButtonText: {
+    fontSize: 50,
+    textAlign: "center",
+    transform: [{ rotate: "90deg" }],
   },
 });
 
