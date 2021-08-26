@@ -2,8 +2,7 @@ import React from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { Accelerometer } from "expo-sensors";
 import { STEP_SENSITIVITY } from "../utils/AppConstant";
-
-//import { Pedometer } from "expo-legacy";
+import AxisPad from "react-native-axis-pad";
 
 class Home extends React.Component {
   state = {
@@ -55,6 +54,16 @@ class Home extends React.Component {
     return (
       <View style={styles.container}>
         <Text>Walk! And watch this go up: {step}</Text>
+        <AxisPad
+          resetOnRelease={true}
+          autoCenter={true}
+          size={150}
+          handlerSize={75}
+          onValue={({ x, y }) => {
+            // values are between -1 and 1
+            // console.log(x, y);
+          }}
+        ></AxisPad>
       </View>
     );
   }
@@ -62,6 +71,8 @@ class Home extends React.Component {
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
+    width: "100%",
     marginTop: 50,
     alignItems: "center",
   },
